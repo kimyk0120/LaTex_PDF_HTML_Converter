@@ -15,16 +15,30 @@ def check_error(subprocess_run, print_msg=False):
         print("subprocess_run error")
         buf = io.StringIO(out_msg)
         lines = buf.readlines()
-        errLineNum = 0
+        errLineStartNum = []
+        errLineEndNum = []
+        errLineStartFlag = False
+        errMessages = []
         for cnt, line in enumerate(lines, 0):
             if line.find("!") != -1:
-                errLineNum = cnt
-                break
+                errLineStartNum.append(cnt)
+                if errLineStartFlag:
+                    errLineEndNum.append(cnt)
+                errLineStartFlag = True
+            if line.find(" ...") != -1 and errLineStartFlag:
+                errLineEndNum.append(cnt)
+                errLineStartFlag = False
 
-        error_lines = lines[errLineNum:errLineNum + 3]
-        error_lines = [eline.strip() for eline in error_lines]
-        error_message = '\n'.join(error_lines)
-        print(error_message)
+        for errLineStart, errLineEnd in zip(errLineStartNum, errLineEndNum):
+            error_lines = lines[errLineStart:errLineEnd]
+            error_lines = [eline.strip() for eline in error_lines]
+            error_message = '\n'.join(error_lines)
+            errMessages.append(error_message)
+
+        if len(errMessages) <= 0:
+            errMessages.append(out_msg)
+
+        print(errMessages)
         raise Exception("subprocess_run error")
     if print_msg:
         print(out_msg)
@@ -91,3 +105,7 @@ check_error(subprocess_run, print_msg=True)
 
 
 print("prcs end")
+
+
+if __name__ == '__main__':
+    pass
