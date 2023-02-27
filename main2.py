@@ -39,7 +39,8 @@ def check_error(subprocess_run, print_msg=False):
             errMessages.append(out_msg)
 
         print(errMessages)
-        raise Exception("subprocess_run error")
+
+        raise Exception("subprocess_run error : ", subprocess_run.args)
     if print_msg:
         print(out_msg)
 
